@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cruise Nomad · 콘텐츠 프롬프트 항해일지</title>
+<meta property="og:title" content="Cruise Nomad · 콘텐츠 프롬프트 항해일지">
+<meta property="og:description" content="주제 하나만 넣으면, 크루즈 노마드 스타일 릴스·카드뉴스·유입 프롬프트가 완성됩니다.">
+<style>
+  :root{
+    --navy:#1B3A5C;
+    --navy-deep:#12283F;
+    --gold:#D4A94A;
+    --gold-soft:#E4C983;
+    --ivory:#FAF7F2;
+    --paper:#FDFBF6;
+    --line:rgba(27,58,92,.10);
+    --ink:#22344a;
+    --muted:#6b7d92;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--navy-deep);}
+  body{
+    font-family:'Noto Sans KR',system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    line-height:1.6;
+    word-break:keep-all;
+    min-height:100dvh;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:0 18px 80px;}
+
+  /* ===== HERO ===== */
+  .hero{
+    position:relative;
+    padding:54px 26px 46px;
+    margin:0 -18px 26px;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #24476b 0%, var(--navy) 55%, var(--navy-deep) 100%);
+    overflow:hidden;
+    text-align:center;
+  }
+  /* subtle horizon line */
+  .hero::after{
+    content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5;
+  }
+  .compass{
+    width:44px;height:44px;margin:0 auto 18px;
+    border:1.5px solid var(--gold-soft);border-radius:50%;
+    position:relative;display:grid;place-items:center;
+    box-shadow:0 0 0 6px rgba(212,169,74,.08);
+  }
+  .compass span{
+    position:absolute;width:0;height:0;
+    border-left:5px solid transparent;border-right:5px solid transparent;
+  }
+  .compass .n{top:6px;border-bottom:13px solid var(--gold);}
+  .compass .s{bottom:6px;border-top:13px solid rgba(228,201,131,.35);}
+  .overline{
+    font-size:11px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--gold-soft);font-weight:600;margin-bottom:12px;
+  }
+  .hero h1{
+    color:var(--ivory);font-size:27px;font-weight:800;line-height:1.32;letter-spacing:-.01em;
+  }
+  .hero h1 em{font-style:normal;color:var(--gold);}
+  .hero p{color:rgba(250,247,242,.72);font-size:14px;margin-top:14px;}
+
+  /* ===== INPUT CARD ===== */
+  .console{
+    background:var(--paper);
+    border-radius:16px;
+    padding:22px 20px 20px;
+    box-shadow:0 18px 40px -18px rgba(0,0,0,.55);
+    margin-bottom:12px;
+  }
+  .console label{
+    display:block;font-size:12px;font-weight:700;color:var(--navy);
+    letter-spacing:.02em;margin-bottom:9px;
+  }
+  .console label span{color:var(--gold);font-weight:800;}
+  .field{
+    display:flex;align-items:center;gap:10px;
+    background:#fff;border:1.5px solid var(--line);
+    border-radius:11px;padding:4px 4px 4px 15px;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .field:focus-within{border-color:var(--gold);box-shadow:0 0 0 4px rgba(212,169,74,.14);}
+  .field input{
+    flex:1;border:0;outline:0;background:transparent;
+    font-family:inherit;font-size:16px;color:var(--ink);min-height:44px;
+  }
+  .field input::placeholder{color:#a9b6c4;}
+  .go{
+    border:0;cursor:pointer;flex-shrink:0;
+    background:var(--navy);color:#fff;
+    font-family:inherit;font-weight:700;font-size:14px;
+    min-height:44px;min-width:64px;padding:0 18px;border-radius:9px;
+    transition:background .2s,transform .08s;
+  }
+  .go:hover{background:var(--navy-deep);}
+  .go:active{transform:scale(.97);}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px;}
+  .chip{
+    border:1px solid var(--line);background:#fff;
+    color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:500;
+    padding:7px 13px;border-radius:20px;cursor:pointer;
+    min-height:34px;transition:all .18s;
+  }
+  .chip:hover{border-color:var(--gold);color:var(--navy);background:#fffdf8;}
+
+  .hint{text-align:center;color:rgba(250,247,242,.5);font-size:11.5px;margin-bottom:30px;letter-spacing:.02em;}
+
+  /* ===== RESULTS ===== */
+  .logbook{display:none;}
+  .logbook.on{display:block;animation:rise .5s ease both;}
+  @keyframes rise{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+
+  .ledger-head{
+    display:flex;align-items:baseline;justify-content:space-between;
+    color:var(--ivory);margin:6px 2px 18px;
+  }
+  .ledger-head .topic{font-size:18px;font-weight:800;color:var(--gold);}
+  .ledger-head .topic small{color:rgba(250,247,242,.6);font-weight:500;font-size:12px;display:block;letter-spacing:.16em;text-transform:uppercase;margin-bottom:2px;}
+  .ledger-head .cnt{font-size:12px;color:rgba(250,247,242,.55);}
+
+  .entry{
+    background:var(--paper);
+    border-radius:14px;
+    margin-bottom:14px;
+    overflow:hidden;
+    box-shadow:0 12px 28px -16px rgba(0,0,0,.5);
+  }
+  .entry-top{
+    display:flex;align-items:center;gap:13px;
+    padding:16px 18px;
+    border-bottom:1px dashed var(--line);
+    position:relative;
+  }
+  .stamp{
+    flex-shrink:0;width:38px;height:38px;border-radius:9px;
+    background:linear-gradient(145deg,var(--navy),#2b5077);
+    color:var(--gold-soft);display:grid;place-items:center;
+    font-weight:800;font-size:15px;font-family:'Noto Sans KR',sans-serif;
+  }
+  .entry-top h3{font-size:15.5px;font-weight:800;color:var(--navy);line-height:1.35;}
+  .entry-top .tag{display:block;font-size:11px;font-weight:600;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:3px;}
+  .prompt{
+    font-family:'SF Mono',ui-monospace,'Menlo',monospace;
+    font-size:13px;line-height:1.72;color:var(--ink);
+    white-space:pre-wrap;
+    padding:16px 18px;
+    background:
+      repeating-linear-gradient(180deg,transparent 0 27px, var(--line) 27px 28px);
+    background-position:0 15px;
+  }
+  .prompt b{color:var(--navy);font-weight:700;background:rgba(212,169,74,.16);border-radius:3px;padding:0 3px;}
+  .entry-foot{
+    display:flex;gap:8px;padding:12px 18px 15px;
+  }
+  .copy{
+    flex:1;border:1.5px solid var(--navy);background:var(--navy);color:#fff;
+    font-family:inherit;font-weight:700;font-size:13.5px;
+    min-height:44px;border-radius:9px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    transition:all .18s;
+  }
+  .copy:hover{background:var(--navy-deep);}
+  .copy.done{background:var(--gold);border-color:var(--gold);color:var(--navy-deep);}
+  .copy svg{width:15px;height:15px;}
+
+  .copyall{
+    width:100%;border:1.5px solid var(--gold);background:transparent;color:var(--gold-soft);
+    font-family:inherit;font-weight:700;font-size:14px;letter-spacing:.02em;
+    min-height:50px;border-radius:11px;cursor:pointer;margin-top:4px;
+    transition:all .18s;
+  }
+  .copyall:hover{background:rgba(212,169,74,.12);}
+  .copyall.done{background:var(--gold);color:var(--navy-deep);}
+
+  /* ===== RULES FOOTER ===== */
+  .rules{
+    margin-top:34px;padding:20px 20px 22px;
+    border:1px solid rgba(212,169,74,.28);border-radius:14px;
+    background:rgba(212,169,74,.05);
+  }
+  .rules h4{color:var(--gold-soft);font-size:12px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;font-weight:700;}
+  .rules ul{list-style:none;display:grid;gap:9px;}
+  .rules li{color:rgba(250,247,242,.78);font-size:12.5px;line-height:1.5;padding-left:18px;position:relative;}
+  .rules li::before{content:"⚓";position:absolute;left:0;top:0;font-size:11px;opacity:.7;}
+  .rules li b{color:var(--gold-soft);font-weight:700;}
+
+  .foot{text-align:center;color:rgba(250,247,242,.4);font-size:11px;margin-top:28px;letter-spacing:.04em;}
+  .foot b{color:var(--gold-soft);}
+
+  @media (max-width:400px){
+    .hero h1{font-size:24px;}
+    .wrap{padding:0 14px 70px;}
+    .hero{margin:0 -14px 24px;padding:48px 20px 40px;}
+  }
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--navy-deep);color:var(--gold-soft);
+    border:1px solid rgba(212,169,74,.4);
+    padding:12px 22px;border-radius:30px;font-size:13px;font-weight:600;
+    opacity:0;pointer-events:none;transition:all .3s;z-index:99;white-space:nowrap;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="compass"><span class="n"></span><span class="s"></span></div>
+    <div class="overline">Cruise Nomad · Content Log</div>
+    <h1>주제 하나면,<br><em>4개의 프롬프트</em>가<br>항해를 시작합니다</h1>
+    <p>주제를 적으면 크루즈 노마드 스타일로<br>바로 붙여넣을 프롬프트가 완성돼요.</p>
+  </header>
+
+  <section class="console">
+    <label>오늘의 콘텐츠 주제 <span>✦</span></label>
+    <div class="field">
+      <input id="topic" type="text" placeholder="예) 크루즈에서의 하루" autocomplete="off" />
+      <button class="go" id="goBtn">생성</button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </section>
+  <p class="hint">아래 예시를 눌러도 바로 시작할 수 있어요</p>
+
+  <section class="logbook" id="logbook">
+    <div class="ledger-head">
+      <div class="topic"><small>Topic</small><span id="topicOut"></span></div>
+      <div class="cnt">4 entries</div>
+    </div>
+    <div id="entries"></div>
+    <button class="copyall" id="copyAll">전체 프롬프트 한 번에 복사하기</button>
+  </section>
+
+  <section class="rules">
+    <h4>이 도구가 지키는 규칙</h4>
+    <ul>
+      <li>브랜드 금칙어 자동 반영 — <b>'인크루즈'</b> 대신 <b>'크루즈 멤버십 구독 플랫폼'</b></li>
+      <li>공개 콘텐츠에 <b>수익·모집 표현 금지</b>, CTA는 "DM 주세요 / 프로필 링크"만</li>
+      <li>모든 프롬프트에 <b>벨라 톤</b>(10년·2년·16번 서사, 나답게 사는 삶) 내장</li>
+    </ul>
+  </section>
+
+  <p class="foot">⚓ <b>Cruise Nomad · Bella</b> — Living between oceans & cities</p>
+</div>
+
+<div class="toast" id="toast">복사됐어요 ✦</div>
+
+<script>
+(function(){
+  var BRAND_RULE = "\n\n[브랜드 규칙 · 반드시 지킬 것]\n- '인크루즈'라는 단어는 절대 쓰지 말고, 꼭 필요하면 '크루즈 멤버십 구독 플랫폼'으로 표현\n- 수익 인증, 부업, 모집, 사업 권유 표현 금지\n- CTA는 'DM 주세요' 또는 '프로필 링크'만 사용\n- 톤: 크루즈 노마드 벨라 — 담백하고 진솔하게, 나답게 사는 삶의 결";
+
+  var PERSONA = "나는 2년간 배 위에서 사는 크루즈 노마드 '벨라'야. 16번의 크루즈를 다녀왔고, 인스타(@bellaleeon)에 여행·자유로운 삶을 기록해. 타깃은 '나도 언젠가 이렇게 살고 싶다'고 생각하는 30~40대 여성이야.";
+
+  var chipList = ["크루즈에서의 하루","혼자 떠난 첫 크루즈","배 위에서 일하는 법","크루즈 짐 싸기","다음 정박지에서"];
+
+  var templates = [
+    {
+      tag:"01 · Research",
+      title:"조회수 나오는 주제 찾기",
+      stamp:"探",
+      build:function(t){
+        return PERSONA+"\n\n지난 30일 동안 '<b>"+t+"</b>' 분야에서 조회수·저장·댓글이 잘 나온 인스타 릴스, 틱톡, 유튜브 쇼츠를 분석해줘.\n\n반복되는 주제, 자주 쓰는 훅, 사람들이 멈추는 포인트를 정리하고,\n\n내 크루즈 노마드 계정에 바로 쓸 수 있는 콘텐츠 아이디어 10개를\n주제 / 한 줄 훅 / 구성 / CTA 형식으로 뽑아줘.\n\n촬영 장비 없이 폰 하나로 바로 찍을 수 있는 쉬운 아이디어만 골라줘."+BRAND_RULE;
+      }
+    },
+    {
+      tag:"02 · Funnel",
+      title:"고객 문의로 이어지는 유입 설계",
+      stamp:"引",
+      build:function(t){
+        return "내 계정 주제는 '크루즈 노마드 라이프(<b>"+t+"</b>)',\n상품은 '크루즈 멤버십 구독 플랫폼 안내 & 그룹 크루즈 여행',\n타깃은 '자유로운 삶을 꿈꾸는 30~40대 여성'이야.\n\n팔로워가 적어도 DM 문의가 들어오게\n인지 → 공감 → 신뢰 → 전환 순서로 콘텐츠 12개를 짜줘.\n\n각 콘텐츠마다\n제목,\n핵심 포인트,\nCTA 문구,\n댓글로 받을 키워드,\nDM 첫 답장 3개까지 써줘.\n\n광고처럼 말고 자연스럽고 쉽게 써줘."+BRAND_RULE;
+      }
+    },
+    {
+      tag:"03 · Carousel",
+      title:"저장되는 카드뉴스 설계",
+      stamp:"貯",
+      build:function(t){
+        return "'<b>"+t+"</b>'로 인스타 카드뉴스 6장 구성을 짜줘.\n\n1장은 멈추게 하는 제목(스토리텔링 훅),\n2~5장은 핵심 내용,\n6장은 CTA로 만들어줘.\n\n각 장은 2줄 이내로 짧게 쓰고,\n숫자, 체크포인트, 예시 문장을 넣어서\n저장하고 싶은 흐름으로 만들어줘.\n\n크루즈 노마드 초보자도 바로 쓸 수 있게 쉬운 말로 써줘."+BRAND_RULE;
+      }
+    },
+    {
+      tag:"04 · Reels",
+      title:"끝까지 보는 릴스 대본",
+      stamp:"航",
+      build:function(t){
+        return "'<b>"+t+"</b>'에 맞는 20~30초 릴스 대본을 써줘.\n\n1) 첫 2초 훅\n2) 중간 핵심 3포인트\n3) 마지막 CTA\n순서로 구성해줘.\n\n그리고 자막 문장, 실제 대사, 화면 연출을 한 줄씩 나눠서 써줘.\n\n처음 찍는 사람도 그대로 읽으면 되게 쉽고 자연스럽게,\n크루즈 위 실제 촬영이 가능한 화면으로 써줘."+BRAND_RULE;
+      }
+    }
+  ];
+
+  var $=function(s){return document.querySelector(s);};
+  var topicIn=$("#topic"), entriesEl=$("#entries"), logbook=$("#logbook"), topicOut=$("#topicOut"), toast=$("#toast");
+  var lastPlain=[];
+
+  // render chips
+  var chipsEl=$("#chips");
+  chipList.forEach(function(c){
+    var b=document.createElement("button");
+    b.className="chip";b.textContent=c;
+    b.onclick=function(){topicIn.value=c;generate();};
+    chipsEl.appendChild(b);
+  });
+
+  function esc(s){return s.replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+  // build html view with <b> highlight preserved from templates (they use <b> already)
+  function toHtml(raw){
+    // raw contains <b>..</b> intentionally; escape everything else
+    var parts=raw.split(/(<b>.*?<\/b>)/g);
+    return parts.map(function(p){
+      if(/^<b>.*<\/b>$/.test(p)){
+        return "<b>"+esc(p.replace(/<\/?b>/g,""))+"</b>";
+      }
+      return esc(p);
+    }).join("");
+  }
+  function toPlain(raw){return raw.replace(/<\/?b>/g,"");}
+
+  function showToast(msg){
+    toast.textContent=msg;toast.classList.add("show");
+    clearTimeout(toast._t);toast._t=setTimeout(function(){toast.classList.remove("show");},1600);
+  }
+
+  function generate(){
+    var t=(topicIn.value||"").trim();
+    if(!t){topicIn.focus();showToast("주제를 먼저 적어주세요 ✦");return;}
+    topicOut.textContent=t;
+    entriesEl.innerHTML="";
+    lastPlain=[];
+    templates.forEach(function(tpl,i){
+      var raw=tpl.build(t);
+      var plain=toPlain(raw);
+      lastPlain.push("["+tpl.title+"]\n"+plain);
+
+      var entry=document.createElement("div");
+      entry.className="entry";
+      entry.innerHTML=
+        '<div class="entry-top">'+
+          '<div class="stamp">'+tpl.stamp+'</div>'+
+          '<div><span class="tag">'+tpl.tag+'</span><h3>'+tpl.title+'</h3></div>'+
+        '</div>'+
+        '<div class="prompt">'+toHtml(raw)+'</div>'+
+        '<div class="entry-foot">'+
+          '<button class="copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>이 프롬프트 복사</button>'+
+        '</div>';
+      var btn=entry.querySelector(".copy");
+      btn.onclick=function(){
+        copy(plain);btn.classList.add("done");
+        btn.innerHTML="복사 완료 ✦";
+        setTimeout(function(){btn.classList.remove("done");
+          btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>이 프롬프트 복사';
+        },1600);
+      };
+      entriesEl.appendChild(entry);
+    });
+    logbook.classList.add("on");
+    logbook.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+
+  function copy(text){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){showToast("복사됐어요 ✦");},fallback);
+    }else{fallback();}
+    function fallback(){
+      var ta=document.createElement("textarea");ta.value=text;
+      ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);
+      ta.select();try{document.execCommand("copy");showToast("복사됐어요 ✦");}catch(e){showToast("복사 실패 — 길게 눌러 복사하세요");}
+      document.body.removeChild(ta);
+    }
+  }
+
+  $("#goBtn").onclick=generate;
+  topicIn.addEventListener("keydown",function(e){if(e.key==="Enter")generate();});
+  $("#copyAll").onclick=function(){
+    if(!lastPlain.length)return;
+    var all=lastPlain.join("\n\n──────────────\n\n");
+    copy(all);
+    var b=$("#copyAll");b.classList.add("done");b.textContent="4개 프롬프트 모두 복사 완료 ✦";
+    setTimeout(function(){b.classList.remove("done");b.textContent="전체 프롬프트 한 번에 복사하기";},1800);
+  };
+})();
+</script>
+</body>
+</html>
